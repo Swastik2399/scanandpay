@@ -2,16 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scan and Pay</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h2>Scan and Pay with Full2SMS</h2>
+    <h2>Scan and Pay</h2>
+
     <div id="qr-reader" style="width: 300px;"></div>
     <div id="result"></div>
-    <button onclick="processPayment()">Pay Now</button>
+
+    <label for="amount">Enter Amount:</label>
+    <input type="number" id="amount" placeholder="Amount in INR" />
+
+    <button onclick="payNow()">Pay Now</button>
 
     <script src="script.js"></script>
 </body>
