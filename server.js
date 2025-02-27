@@ -1,36 +1,36 @@
-let scannedData = '';
+const express = require('express');
+const fetch = require('node-fetch');
+const cors = require('cors');
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-function onScanSuccess(decodedText) {
-    scannedData = decodedText;
-    document.getElementById('result').innerText = `Scanned: ${decodedText}`;
-}
+app.use(cors());
+app.use(express.json());
 
-function onScanFailure(error) {
-    console.warn(`QR scan error: ${error}`);
-}
+// Test route
+app.get('/', (req, res) => {
+    res.send('Server is working! 🚀');
+});
 
-const html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 250 });
-html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+// Full2SMS API route
+app.post('/api/pay', async (req, res) => {
+    const { amount, mobile } = req.body;
+    const guid = Math.random().toString(36).substring(2, 15);
 
-async function payNow() {
-    const amount = document.getElementById('amount').value;
+    const FULL2SMS_API = 'https://full2sms.in/api/v2/payout';
+    const MID = 'YOUR_MERCHANT_ID';
+    const MKEY = 'YOUR_API_KEY';
 
-    if (!scannedData) {
-        alert('Please scan a QR code first!');
-        return;
+    const url = `${FULL2SMS_API}?mid=${MID}&mkey=${MKEY}&guid=${guid}&type=wallet&amount=${amount}&mobile=${mobile}&info=Payment`;
+
+    try {
+        const response = await fetch(url, { method: 'POST' });
+        const data = await response.json();
+        res.json({ status: data.status, message: data.message });
+    } catch (error) {
+        console.error('Payment failed:', error);
+        res.status(500).json({ status: 'error', message: 'Payment failed' });
     }
+});
 
-    if (!amount || amount <= 0) {
-        alert('Please enter a valid amount!');
-        return;
-    }
-
-    const response = await fetch('/api/pay', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scannedData, amount })
-    });
-
-    const result = await response.json();
-    alert(result.message);
-}
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
